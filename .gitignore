@@ -1,0 +1,80 @@
+# ------------------------
+# Python
+# ------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.eggs/
+*.sqlite3
+db.sqlite3
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Byte-compiled / cache
+*.log
+*.pot
+*.pyc
+*.pkl
+*.db
+
+# ------------------------
+# FastAPI / Uvicorn
+# ------------------------
+*.pid
+*.coverage
+.coverage.*
+.cache/
+.pytest_cache/
+htmlcov/
+
+# ------------------------
+# Node / React
+# ------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp.*
+.pnp.js
+
+# Production build
+frontend/build/
+frontend/dist/
+
+# Dependency directories
+frontend/.next/
+frontend/out/
+
+# ------------------------
+# OS-specific
+# ------------------------
+.DS_Store
+Thumbs.db
+
+# ------------------------
+# Environment & secrets
+# ------------------------
+.env
+*.env
+.env.local
+.env.*.local
+
+# ------------------------
+# VSCode / Codespaces
+# ------------------------
+.vscode/
+.idea/
+*.code-workspace
+
+# ------------------------
+# Other
+# ------------------------
+*.bak
+*.swp
