@@ -1,0 +1,47 @@
+{
+  "2025-09-16": [
+    {
+      "name": "dips",
+      "sets": [
+        {
+          "reps": 1,
+          "weight": 1.0
+        },
+        {
+          "reps": 1,
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "name": "",
+      "sets": []
+    },
+    {
+      "name": "bench press",
+      "sets": []
+    },
+    {
+      "name": "lateral raise",
+      "sets": []
+    },
+    {
+      "name": "shoulder press",
+      "sets": []
+    },
+    {
+      "name": "tricep pushdown",
+      "sets": []
+    },
+    {
+      "name": "overhead tricep extension",
+      "sets": []
+    }
+  ],
+  "2025-09-21": [
+    {
+      "name": "",
+      "sets": []
+    }
+  ]
+}

@@ -2,25 +2,74 @@
 <html>
 <head>
     <title>Gym Tracker</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Gym Tracker</h1>
+    <div class="container">
 
-    <div>
-        <h2>Add Exercise</h2>
-        <input type= "text" id="exercise-name" placeholder="Exercise name">
-        <input id="exercise-date" type="date">
-        <button id="add-exercise-btn">Add Exercise</button>
-        
+        <div id="mini-timer">
+            <span id="mini-timer-display">00:00</span>
+            <button id="mini-start-pause-btn">Start</button>
+        </div>
+
+        <h1>Gym Tracker</h1>
+        <div>
+            <h2>Workouts</h2>
+            <input id="global-date" type="date">
+            <button id="view-workouts-btn">View Workouts</button>
+            <div id="workouts-display"></div>
+        </div>
+
+        <div>
+            <h2>Add Exercise</h2>
+            <input type= "text" id="exercise-name" placeholder="Exercise name">
+            <button type="button" id="add-exercise-btn">Add Exercise</button>
+        </div>
+
+        <h2>Templates</h2>
+
+        <div>
+            <label for="template-select">Choose a template:</label>
+            <select id="template-select"></select>
+            <button id="apply-template-btn">Apply Template</button>
+        </div>
+
+        <div id="template-list">
+           
+        </div>
+
+        <h3>Create Template</h3>
+        <input type="text" id="new-template-name" placeholder="Template Name">
+        <input type="text" id="new-template-exercises" placeholder="Exercises (comma separated)">
+        <button id="create-template-btn">Create Template</button>
+
+        <h2>Workout Timer</h2>
+        <div id="timer">
+            <span id="timer-display">00:00</span>
+            <div>
+                <button id="preset-btn1" data-time="60">1 min</button>
+                <button id="preset-btn2" data-time="120">2 min</button>
+                <button id="preset-btn3" data-time="180">3 min</button>
+            </div>
+            <div>
+                <button id="minus-15">-15s</button>
+                <button id="plus-15">+15s</button>
+            </div>
+            <div>
+                <button id="start-pause-btn">Start</button>
+                <button id="reset-btn">Reset</button>
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
     </div>
-
-    <div>
-        <h2>Workouts</h2>
-        <input id="view-date" type="date">
-        <button id="view-workouts-btn">View Workouts</button>
-        <div id="workouts-display"></div>
-    </div>
-
-    <script src="script.js"></script>
 </body>
+<script src="script.js"></script>
 </html>
