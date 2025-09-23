@@ -7,6 +7,11 @@ const templateListDiv = document.getElementById("template-list");
 
 viewBtn.addEventListener("click", viewWorkouts);
 window.addEventListener('load', loadTemplates);
+window.addEventListener("load", () => {
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("global-date").value = today;
+    viewWorkouts();
+});
 
 addBtn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -63,6 +68,10 @@ createTemplateBtn.addEventListener("click", () => {
         .map(e => e.trim())
         .filter(e => e);
 
+    if (!name) {
+        alert("Please enter a template name");
+        return;
+    }
     fetch("http://127.0.0.1:8000/add_template", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -73,8 +82,9 @@ createTemplateBtn.addEventListener("click", () => {
             if (data.error) {
                 alert(data.error);
             } else {
-                //alert(data.message);
-                loadTemplates(); // refresh dropdown
+                document.getElementById("new-template-name").value = "";
+                document.getElementById("new-template-exercises").value = "";
+                loadTemplates();
             }
         })
         .catch(err => console.error("Error creating template:", err));
@@ -357,6 +367,9 @@ function deleteSet(date, exerciseName, setIndex) {
     })
     .catch(error => console.error("Error:", error));
 }
+
+
+
 // TIMER 
 let timerInterval = null;
 let remainingTime = 0; 

@@ -14,10 +14,6 @@
       ]
     },
     {
-      "name": "",
-      "sets": []
-    },
-    {
       "name": "bench press",
       "sets": []
     },
@@ -38,9 +34,96 @@
       "sets": []
     }
   ],
-  "2025-09-21": [
+  "2025-09-23": [
     {
-      "name": "",
+      "name": "dips",
+      "sets": [
+        {
+          "reps": 10,
+          "weight": 50.0
+        }
+      ]
+    },
+    {
+      "name": "bench press",
+      "sets": [
+        {
+          "reps": 8,
+          "weight": 30.0
+        }
+      ]
+    },
+    {
+      "name": "lateral raise",
+      "sets": [
+        {
+          "reps": 12,
+          "weight": 25.0
+        }
+      ]
+    },
+    {
+      "name": "shoulder press",
+      "sets": []
+    },
+    {
+      "name": "tricep pushdown",
+      "sets": []
+    },
+    {
+      "name": "overhead tricep extension",
+      "sets": [
+        {
+          "reps": 5,
+          "weight": 100.0
+        }
+      ]
+    }
+  ],
+  "2025-09-22": [
+    {
+      "name": "dips",
+      "sets": [
+        {
+          "reps": 8,
+          "weight": 20.0
+        }
+      ]
+    },
+    {
+      "name": "bench press",
+      "sets": []
+    },
+    {
+      "name": "lateral raise",
+      "sets": []
+    },
+    {
+      "name": "shoulder press",
+      "sets": []
+    },
+    {
+      "name": "tricep pushdown",
+      "sets": []
+    },
+    {
+      "name": "overhead tricep extension",
+      "sets": []
+    },
+    {
+      "name": "Plank",
+      "sets": []
+    },
+    {
+      "name": "sit ups",
+      "sets": []
+    },
+    {
+      "name": "hanging leg raises",
+      "sets": []
+    },
+    {
+      "name": "ski erg",
       "sets": []
     }
   ]
