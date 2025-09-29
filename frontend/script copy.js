@@ -8,7 +8,7 @@ const loginBtn = document.getElementById("login-btn");
 const registerBtn = document.getElementById("register-btn");
 const authMessage = document.getElementById("auth-message");
 const loginSection = document.getElementById("login");
-const mainContent = document.querySelector(".container"); 
+const mainContent = document.querySelector(".container"); // Assuming workouts/templates are inside container
 
 function saveToken(token) {
     localStorage.setItem("token", token);
@@ -17,43 +17,6 @@ function saveToken(token) {
 function getToken() {
     return localStorage.getItem("token");
 }
-
-async function authFetch(url, options = {}) {
-    const token = getToken(); 
-    if (!token) {
-        alert("You are not logged in!");
-        return Promise.reject("No token found");
-    }
-
-    // Ensure headers exist
-    options.headers = options.headers || {};
-    options.headers["Authorization"] = `Bearer ${token}`;
-
-    return fetch(url, options);
-}
-
-async function checkExistingLogin() {
-    const token = getToken();
-    if (!token) {
-        return;
-    }
-
-    try {
-        const res = await authFetch("http://127.0.0.1:8000/templates");
-        if (res.ok) {
-            showMainContent(); // This will now set date and load data
-        } else {
-            localStorage.removeItem("token");
-        }
-    } catch (err) {
-        localStorage.removeItem("token");
-        console.log("Invalid token, please log in again");
-    }
-}
-
-// Call this when the page loads
-window.addEventListener("load", checkExistingLogin);
-
 
 loginBtn.addEventListener("click", async () => {
     const username = document.getElementById("username").value;
@@ -118,172 +81,207 @@ registerBtn.addEventListener("click", async () => {
 function showMainContent() {
     loginSection.style.display = "none";
     mainContent.style.display = "block";
-    
-    // Initialize the page when main content is shown
-    const today = new Date().toISOString().split("T")[0];
-    document.getElementById("global-date").value = today;
-    
-    // Load initial data
-    loadTemplates();
-    viewWorkouts();
 }
 
-mainContent.style.display = "none";
+//mainContent.style.display = "none";
 
 viewBtn.addEventListener("click", viewWorkouts);
 window.addEventListener('load', loadTemplates);
-
-addBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
-    const name = document.getElementById("exercise-name").value;
-    const date = document.getElementById("global-date").value;
-    if (!name) return alert("Please enter an exercise name");
-
-    try {
-        const res = await authFetch(`http://127.0.0.1:8000/add_exercise/${date}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, sets: [] })
-        });
-        const data = await res.json();
-        if (data.error) alert(data.error);
-        else {
-            document.getElementById("exercise-name").value = "";
-            viewWorkouts();
-        }
-    } catch (err) { console.error(err); }
+window.addEventListener("load", () => {
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("global-date").value = today;
+    viewWorkouts();
 });
 
+addBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-applyTemplateBtn.addEventListener("click", async () => {
+    const name = document.getElementById("exercise-name").value;
+    const date = document.getElementById("global-date").value;
+
+    if (!name) {
+        alert("Please enter an exercise name");
+        return; 
+    }
+
+    fetch(`http://127.0.0.1:8000/add_exercise/${date}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, sets: [] })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            document.getElementById("exercise-name").value = "";
+            setTimeout(() => viewWorkouts(), 100);
+        }
+    })
+    .catch(err => console.error(err));
+});
+
+applyTemplateBtn.addEventListener("click", () => {
     const date = document.getElementById("global-date").value;
     const templateName = templateSelect.value;
 
-    try {
-        const res = await authFetch(`http://127.0.0.1:8000/apply_template/${date}/${templateName}`, {
-            method: "POST"
-        });
-        const data = await res.json();
-        if (data.error) alert(data.error);
-        else viewWorkouts();
-    } catch (err) { console.error(err); }
+    fetch(`http://127.0.0.1:8000/apply_template/${date}/${templateName}`, {
+        method: "POST"
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                //alert(data.message);
+                setTimeout(() => viewWorkouts(), 100);
+            }
+        })
+        .catch(err => console.error("Error applying template:", err));
 });
 
-createTemplateBtn.addEventListener("click", async () => {
+createTemplateBtn.addEventListener("click", () => {
     const name = document.getElementById("new-template-name").value;
     const exercises = document.getElementById("new-template-exercises").value
-        .split(",").map(e => e.trim()).filter(e => e);
-    if (!name) return alert("Please enter a template name");
+        .split(",")
+        .map(e => e.trim())
+        .filter(e => e);
 
-    try {
-        const res = await authFetch("http://127.0.0.1:8000/add_template", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, exercises })
-        });
-        const data = await res.json();
-        if (data.error) alert(data.error);
-        else {
-            document.getElementById("new-template-name").value = "";
-            document.getElementById("new-template-exercises").value = "";
-            loadTemplates();
-        }
-    } catch (err) { console.error(err); }
+    if (!name) {
+        alert("Please enter a template name");
+        return;
+    }
+    fetch("http://127.0.0.1:8000/add_template", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, exercises })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                document.getElementById("new-template-name").value = "";
+                document.getElementById("new-template-exercises").value = "";
+                loadTemplates();
+            }
+        })
+        .catch(err => console.error("Error creating template:", err));
 });
 
 
+function loadTemplates() {
+    fetch("http://127.0.0.1:8000/templates")
+        .then(res => res.json())
+        .then(data => {
+            const templates = data.templates;
+            templateSelect.innerHTML = "";
+            templateListDiv.innerHTML = "";
 
-async function loadTemplates() {
-    try {
-        const res = await authFetch("http://127.0.0.1:8000/templates");
-        const data = await res.json();
-        const templates = data.templates;
-        templateSelect.innerHTML = "";
-        templateListDiv.innerHTML = "";
+            Object.keys(templates).forEach(templateName => {
+                // Populate dropdown
+                const option = document.createElement("option");
+                option.value = templateName;
+                option.textContent = templateName;
+                templateSelect.appendChild(option);
 
-        Object.keys(templates).forEach(templateName => {
-            const option = document.createElement("option");
-            option.value = templateName;
-            option.textContent = templateName;
-            templateSelect.appendChild(option);
+                // Create editable template UI
+                const templateDiv = document.createElement("div");
+                templateDiv.classList.add("template-item");
+                templateDiv.style.marginBottom = "10px";
 
-            const templateDiv = document.createElement("div");
-            templateDiv.classList.add("template-item");
-            templateDiv.style.marginBottom = "10px";
+                const nameHeading = document.createElement("h4");
+                nameHeading.textContent = templateName;
+                templateDiv.appendChild(nameHeading);
 
-            const nameHeading = document.createElement("h4");
-            nameHeading.textContent = templateName;
-            templateDiv.appendChild(nameHeading);
+                const exercisesInput = document.createElement("input");
+                exercisesInput.type = "text";
+                exercisesInput.value = templates[templateName].join(", ");
+                exercisesInput.style.width = "70%";
+                templateDiv.appendChild(exercisesInput);
 
-            const exercisesInput = document.createElement("input");
-            exercisesInput.type = "text";
-            exercisesInput.value = templates[templateName].join(", ");
-            exercisesInput.style.width = "70%";
-            templateDiv.appendChild(exercisesInput);
+                const saveBtn = document.createElement("button");
+                saveBtn.textContent = "Save";
+                templateDiv.appendChild(saveBtn);
 
-            const saveBtn = document.createElement("button");
-            saveBtn.textContent = "Save";
-            templateDiv.appendChild(saveBtn);
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "Delete";
+                deleteBtn.style.backgroundColor = "red";
+                deleteBtn.style.color = "white";
+                templateDiv.appendChild(deleteBtn);
 
-            const deleteBtn = document.createElement("button");
-            deleteBtn.textContent = "Delete";
-            deleteBtn.style.backgroundColor = "red";
-            deleteBtn.style.color = "white";
-            templateDiv.appendChild(deleteBtn);
-
-            saveBtn.addEventListener("click", async () => {
-                const updatedExercises = exercisesInput.value.split(",").map(e => e.trim()).filter(e => e);
-                try {
-                    const res = await authFetch(`http://127.0.0.1:8000/edit_template/${templateName}`, {
+                // Save edited template
+                saveBtn.addEventListener("click", () => {
+                    const updatedExercises = exercisesInput.value
+                        .split(",")
+                        .map(e => e.trim())
+                        .filter(e => e);
+                    fetch(`http://127.0.0.1:8000/edit_template/${templateName}`, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ exercises: updatedExercises })
-                    });
-                    const data = await res.json();
-                    if (data.error) alert(data.error);
-                    else loadTemplates();
-                } catch (err) { console.error(err); }
-            });
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.error) {
+                                alert(data.error);
+                            } else {
+                                alert("Template updated!");
+                                loadTemplates();
+                            }
+                        });
+                });
 
-            deleteBtn.addEventListener("click", async () => {
-                try {
-                    const res = await authFetch(`http://127.0.0.1:8000/delete_template/${templateName}`, {
+                // Delete template
+                deleteBtn.addEventListener("click", () => {
+                    fetch(`http://127.0.0.1:8000/delete_template/${templateName}`, {
                         method: "DELETE"
-                    });
-                    const data = await res.json();
-                    if (data.error) alert(data.error);
-                    else loadTemplates();
-                } catch (err) { console.error(err); }
-            });
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.error) {
+                                alert(data.error);
+                            } else {
+                                loadTemplates();
+                            }
+                        });
+                });
 
-            templateListDiv.appendChild(templateDiv);
+                templateListDiv.appendChild(templateDiv);
+            });
         });
-    } catch (err) { console.error(err); }
 }
 
-
-async function viewWorkouts() {
+function viewWorkouts() {
     const date = document.getElementById("global-date").value;
     const displayDiv = document.getElementById("workouts-display");
-    const currentScrollY = window.scrollY; // Store current position
+    const currentScrollY = window.scrollY;
+    // Clear previous content
+
     
     displayDiv.innerHTML = "";
-    const data = await fetchWorkouts(date);
-    if (!data.exercises || data.exercises.length === 0) {
-        displayDiv.textContent = "No exercises found for this date.";
-        return;
-    }
-    renderWorkouts(data.exercises, date, displayDiv);
     
-    // Restore scroll position after rendering
-    window.scrollTo(0, currentScrollY);
+    fetchWorkouts(date)
+        .then(data => {
+            if (!data.exercises || data.exercises.length === 0) {
+                displayDiv.textContent = "No exercises found for this date.";
+                return;
+            }
+            
+            renderWorkouts(data.exercises, date, displayDiv);
+            window.scrollTo(0, currentScrollY);
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            displayDiv.textContent = "Error loading workouts.";
+            window.scrollTo(0, currentScrollY);
+        });
 }
 
-async function fetchWorkouts(date) {
-    try {
-        const res = await authFetch(`http://127.0.0.1:8000/workouts/${date}`);
-        return await res.json();
-    } catch (err) { console.error(err); return { exercises: [] }; }
+function fetchWorkouts(date) {
+    return fetch(`http://127.0.0.1:8000/workouts/${date}`)
+        .then(response => response.json());
 }
 
 function renderWorkouts(exercises, date, container) {
@@ -391,65 +389,65 @@ function createSetForm(date, exerciseName) {
     return setForm;
 }
 
-async function deleteExercise(date, exerciseName) {
-    try {
-        const res = await authFetch(`http://127.0.0.1:8000/delete_exercise/${date}/${exerciseName}`, {
-            method: "DELETE"
-        });
-        const data = await res.json();
-        if (data.error) alert(data.error);
-        else viewWorkouts();
-    } catch (err) { console.error(err); }
+function deleteExercise(date, exerciseName) {
+    fetch(`http://127.0.0.1:8000/delete_exercise/${date}/${exerciseName}`, {
+        method: "DELETE",
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            console.log("About to call viewWorkouts from deleteExercise");
+            console.log("Date field value:", document.getElementById("global-date").value);
+            console.log("Display div exists:", !!document.getElementById("workouts-display"));
+
+            setTimeout(() => {
+                console.log("Inside setTimeout - about to call viewWorkouts");
+                viewWorkouts();
+            }, 100);
+        }
+    })
+    .catch(error => console.error("Error:", error));
 }
 
-
-async function addSet(date, exerciseName, reps, weight) {
-    try {
-        const res = await authFetch(`http://127.0.0.1:8000/add_set/${date}/${exerciseName}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ reps: parseInt(reps), weight: parseFloat(weight) })
-        });
-        const data = await res.json();
-        if (data.error) alert(data.error);
-        else viewWorkouts();
-    } catch (err) { console.error(err); }
+function addSet(date, exerciseName, reps, weight) {
+    fetch(`http://127.0.0.1:8000/add_set/${date}/${exerciseName}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            reps: reps,
+            weight: weight
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            setTimeout(() => viewWorkouts(), 100);
+        }
+    })
+    .catch(error => console.error("Error:", error));
 }
 
-
-async function deleteSet(date, exerciseName, setIndex) {
-    try {
-        const res = await authFetch(`http://127.0.0.1:8000/delete_set/${date}/${exerciseName}/${setIndex}`, {
-            method: "DELETE"
-        });
-        const data = await res.json();
-        if (data.error) alert(data.error);
-        else viewWorkouts();
-    } catch (err) { console.error(err); }
+function deleteSet(date, exerciseName, setIndex) {
+    fetch(`http://127.0.0.1:8000/delete_set/${date}/${exerciseName}/${setIndex}`, {
+        method: "DELETE",
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            setTimeout(() => viewWorkouts(), 100);
+        }
+    })
+    .catch(error => console.error("Error:", error));
 }
 
-const logoutBtn = document.getElementById("logout-btn");
-logoutBtn.addEventListener("click", () => {
-    // Remove the token from localStorage
-    localStorage.removeItem("token");
-    
-    // Clear any displayed data
-    document.getElementById("workouts-display").innerHTML = "";
-    document.getElementById("template-list").innerHTML = "";
-    document.getElementById("template-select").innerHTML = "";
-    
-    // Clear form fields
-    document.getElementById("username").value = "";
-    document.getElementById("password").value = "";
-    document.getElementById("exercise-name").value = "";
-    document.getElementById("global-date").value = "";
-    
-    // Show login section and hide main content
-    loginSection.style.display = "block";
-    mainContent.style.display = "none";
-    
-    authMessage.textContent = "Logged out successfully";
-});
 
 
 // TIMER 

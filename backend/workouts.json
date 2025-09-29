@@ -126,5 +126,31 @@
       "name": "ski erg",
       "sets": []
     }
+  ],
+  "2025-09-24": [
+    {
+      "name": "dips",
+      "sets": []
+    },
+    {
+      "name": "bench press",
+      "sets": []
+    },
+    {
+      "name": "lateral raise",
+      "sets": []
+    },
+    {
+      "name": "shoulder press",
+      "sets": []
+    },
+    {
+      "name": "tricep pushdown",
+      "sets": []
+    },
+    {
+      "name": "overhead tricep extension",
+      "sets": []
+    }
   ]
 }
