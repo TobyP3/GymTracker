@@ -3,6 +3,9 @@
 <head>
     <title>Gym Tracker</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>  
+    <meta charset="UTF-8">
 </head>
 <body>
     <div id="login">
@@ -15,74 +18,108 @@
     </div>
 
     <div class="container">
+        <!-- Header with logout -->
+        <div class="app-header">
+            <h1>Gym Tracker</h1>
+            <button id="logout-btn" class="logout-btn">Logout</button>
+        </div>
 
+        <!-- Mini Timer (stays fixed) -->
         <div id="mini-timer">
             <span id="mini-timer-display">00:00</span>
             <button id="mini-start-pause-btn">Start</button>
         </div>
 
-        <div style="text-align: right; margin-bottom: 20px;">
-            <button id="logout-btn" style="background-color: #dc3545; color: white;">Logout</button>
-        </div>
-        
-
-        <h1>Gym Tracker</h1>
-        <div>
-            <h2>Workouts</h2>
-            <input id="global-date" type="date">
-            <button id="view-workouts-btn">View Workouts</button>
-            <div id="workouts-display"></div>
-        </div>
-
-        <div>
-            <h2>Add Exercise</h2>
-            <input type= "text" id="exercise-name" placeholder="Exercise name">
-            <button type="button" id="add-exercise-btn">Add Exercise</button>
-        </div>
-
-        <h2>Templates</h2>
-
-        <div>
-            <label for="template-select">Choose a template:</label>
-            <select id="template-select"></select>
-            <button id="apply-template-btn">Apply Template</button>
-        </div>
-
-        <div id="template-list">
-           
-        </div>
-
-        <h3>Create Template</h3>
-        <input type="text" id="new-template-name" placeholder="Template Name">
-        <input type="text" id="new-template-exercises" placeholder="Exercises (comma separated)">
-        <button id="create-template-btn">Create Template</button>
-
-        <h2>Workout Timer</h2>
-        <div id="timer">
-            <span id="timer-display">00:00</span>
-            <div>
-                <button id="preset-btn1" data-time="60">1 min</button>
-                <button id="preset-btn2" data-time="120">2 min</button>
-                <button id="preset-btn3" data-time="180">3 min</button>
+        <!-- Tab Content Areas -->
+        <div class="tab-content">
+            <!-- Workouts Tab -->
+            <div id="workouts-tab" class="tab-pane active">
+                <h2>Workouts</h2>
+                <input id="global-date" type="date">
+                <button id="view-workouts-btn">View Workouts</button>
+                <div id="workouts-display"></div>
+                
+                <h2>Add Exercise</h2>
+                <input type="text" id="exercise-name" placeholder="Exercise name">
+                <button type="button" id="add-exercise-btn">Add Exercise</button>
             </div>
-            <div>
-                <button id="minus-15">-15s</button>
-                <button id="plus-15">+15s</button>
+
+            <!-- Templates Tab -->
+            <div id="templates-tab" class="tab-pane">
+                <h2>Templates</h2>
+                <label for="template-select">Choose a template:</label>
+                <select id="template-select"></select>
+                <button id="apply-template-btn">Apply Template</button>
+                
+                <div id="template-list"></div>
+                
+                <h3>Create Template</h3>
+                <input type="text" id="new-template-name" placeholder="Template Name">
+                <input type="text" id="new-template-exercises" placeholder="Exercises (comma separated)">
+                <button id="create-template-btn">Create Template</button>
             </div>
-            <div>
-                <button id="start-pause-btn">Start</button>
-                <button id="reset-btn">Reset</button>
+
+            <!-- Analytics Tab -->
+            <div id="analytics-tab" class="tab-pane">
+                <h2>Analytics</h2>
+                <div id="calendar-container">
+                    <div id="calendar-header">
+                        <button id="prev-month">&lt;</button>
+                        <span id="current-month-year">September 2025</span>
+                        <button id="next-month">&gt;</button>
+                    </div>
+                    <div id="calendar-grid"></div>
+                </div>
+                
+                <h3>Exercise Progression</h3>
+                <input type="text" id="exercise-name-chart" placeholder="Enter exercise name">
+                <button id="load-chart-btn">Load Progression Chart</button>
+                <div style="max-width: 600px; margin: 20px auto;">
+                    <canvas id="progression-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Timer Tab -->
+            <div id="timer-tab" class="tab-pane">
+                <h2>Workout Timer</h2>
+                <div id="timer">
+                    <span id="timer-display">00:00</span>
+                    <div>
+                        <button id="preset-btn1" data-time="60">1 min</button>
+                        <button id="preset-btn2" data-time="120">2 min</button>
+                        <button id="preset-btn3" data-time="180">3 min</button>
+                    </div>
+                    <div>
+                        <button id="minus-15">-15s</button>
+                        <button id="plus-15">+15s</button>
+                    </div>
+                    <div>
+                        <button id="start-pause-btn">Start</button>
+                        <button id="reset-btn">Reset</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-
-
-
-
-
-
-
-
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-tab="workouts-tab">
+                <span>💪</span>
+                <span>Workouts</span>
+            </button>
+            <button class="nav-btn" data-tab="templates-tab">
+                <span>📋</span>
+                <span>Templates</span>
+            </button>
+            <button class="nav-btn" data-tab="analytics-tab">
+                <span>📊</span>
+                <span>Analytics</span>
+            </button>
+            <button class="nav-btn" data-tab="timer-tab">
+                <span>⏱️</span>
+                <span>Timer</span>
+            </button>
+        </nav>
     </div>
 </body>
 <script src="script.js"></script>

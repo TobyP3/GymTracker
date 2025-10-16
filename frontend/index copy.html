@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gym Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>  
+</head>
+<body>
+    <div id="login">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button id="login-btn">Login</button>
+        <button id="register-btn">Register</button>
+        <div id="auth-message"></div>
+    </div>
+
+    <div class="container">
+
+        <div id="mini-timer">
+            <span id="mini-timer-display">00:00</span>
+            <button id="mini-start-pause-btn">Start</button>
+        </div>
+
+        <div style="text-align: right; margin-bottom: 20px;">
+            <button id="logout-btn" style="background-color: #dc3545; color: white;">Logout</button>
+        </div>
+        
+
+        <h1>Gym Tracker</h1>
+        <div>
+            <h2>Workouts</h2>
+            <input id="global-date" type="date">
+            <button id="view-workouts-btn">View Workouts</button>
+            <div id="workouts-display"></div>
+        </div>
+
+        <div>
+            <h2>Add Exercise</h2>
+            <input type= "text" id="exercise-name" placeholder="Exercise name">
+            <button type="button" id="add-exercise-btn">Add Exercise</button>
+        </div>
+
+        <h2>Templates</h2>
+
+        <div>
+            <label for="template-select">Choose a template:</label>
+            <select id="template-select"></select>
+            <button id="apply-template-btn">Apply Template</button>
+        </div>
+
+        <div id="template-list">
+           
+        </div>
+
+        <h3>Create Template</h3>
+        <input type="text" id="new-template-name" placeholder="Template Name">
+        <input type="text" id="new-template-exercises" placeholder="Exercises (comma separated)">
+        <button id="create-template-btn">Create Template</button>
+
+        <h2>Analytics</h2>
+        <div id="calendar-container">
+            <div id="calendar-header">
+                <button id="prev-month">&lt;</button>
+                <span id="current-month-year">September 2025</span>
+                <button id="next-month">&gt;</button>
+            </div>
+            <div id="calendar-grid"></div>
+        </div>
+        <h3>Exercise Progression</h3>
+        <input type="text" id="exercise-name-chart" placeholder="Enter exercise name">
+        <button id="load-chart-btn">Load Progression Chart</button>
+        <div style="max-width: 600px; margin: 20px auto;">
+            <canvas id="progression-chart"></canvas>
+        </div>
+
+        <h2>Workout Timer</h2>
+        <div id="timer">
+            <span id="timer-display">00:00</span>
+            <div>
+                <button id="preset-btn1" data-time="60">1 min</button>
+                <button id="preset-btn2" data-time="120">2 min</button>
+                <button id="preset-btn3" data-time="180">3 min</button>
+            </div>
+            <div>
+                <button id="minus-15">-15s</button>
+                <button id="plus-15">+15s</button>
+            </div>
+            <div>
+                <button id="start-pause-btn">Start</button>
+                <button id="reset-btn">Reset</button>
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+    </div>
+</body>
+<script src="script.js"></script>
+</html>

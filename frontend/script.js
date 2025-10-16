@@ -451,6 +451,226 @@ logoutBtn.addEventListener("click", () => {
     authMessage.textContent = "Logged out successfully";
 });
 
+const calendarGrid = document.getElementById("calendar-grid");
+const currentMonthYear = document.getElementById("current-month-year");
+const prevMonthBtn = document.getElementById("prev-month");
+const nextMonthBtn = document.getElementById("next-month");
+
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth() + 1; // 1–12
+
+async function loadCalendar(year, month) {
+    try {
+        const res = await authFetch(`http://127.0.0.1:8000/analytics/calendar/${year}/${month}`);
+        const data = await res.json();
+
+        // Update header
+        const monthName = new Date(year, month - 1).toLocaleString("default", { month: "long" });
+        currentMonthYear.textContent = `${monthName} ${year}`;
+
+        // Clear old grid
+        calendarGrid.innerHTML = "";
+
+        // Days of week header (optional)
+        ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
+            const headerCell = document.createElement("div");
+            headerCell.textContent = d;
+            headerCell.style.fontWeight = "bold";
+            calendarGrid.appendChild(headerCell);
+        });
+
+        // Calculate first weekday offset
+        const firstDay = new Date(year, month - 1, 1).getDay();
+        for (let i = 0; i < firstDay; i++) {
+            const emptyCell = document.createElement("div");
+            emptyCell.className = "calendar-day empty";
+            calendarGrid.appendChild(emptyCell);
+        }
+
+        // Fill in days
+        const days = data.days;
+        Object.keys(days).forEach(dateStr => {
+            const isWorkout = days[dateStr];
+            const day = parseInt(dateStr.split("-")[2]);
+
+            const dayDiv = document.createElement("div");
+            dayDiv.className = "calendar-day " + (isWorkout ? "workout-day" : "rest-day");
+            dayDiv.textContent = day;
+            dayDiv.addEventListener("click", () => {
+                    document.getElementById("global-date").value = dateStr; // update global date input
+                    viewWorkouts(); // load workouts for clicked day
+                    window.scrollTo({ top: document.getElementById("workouts-display").offsetTop, behavior: "smooth" });
+            });
+
+            calendarGrid.appendChild(dayDiv);
+        });
+
+    } catch (err) {
+        console.error("Error loading calendar:", err);
+    }
+}
+
+// Event listeners for navigation
+prevMonthBtn.addEventListener("click", () => {
+    currentMonth--;
+    if (currentMonth < 1) {
+        currentMonth = 12;
+        currentYear--;
+    }
+    loadCalendar(currentYear, currentMonth);
+});
+
+nextMonthBtn.addEventListener("click", () => {
+    currentMonth++;
+    if (currentMonth > 12) {
+        currentMonth = 1;
+        currentYear++;
+    }
+    loadCalendar(currentYear, currentMonth);
+});
+
+// Initialize
+window.addEventListener("load", () => {
+    loadCalendar(currentYear, currentMonth);
+});
+
+const loadChartBtn = document.getElementById("load-chart-btn");
+let progressionChart = null; // Store chart instance so we can update it
+
+// Define colors for different sets
+const setColors = [
+    '#4CAF50', // Set 1 - Green
+    '#2196F3', // Set 2 - Blue  
+    '#FF9800', // Set 3 - Orange
+    '#9C27B0', // Set 4 - Purple
+    '#F44336', // Set 5 - Red
+    '#00BCD4', // Set 6 - Cyan
+];
+
+loadChartBtn.addEventListener("click", async () => {
+    const exerciseName = document.getElementById("exercise-name-chart").value;
+    if (!exerciseName) {
+        alert("Please enter an exercise name");
+        return;
+    }
+    
+    try {
+        const res = await authFetch(`http://127.0.0.1:8000/analytics/exercise_progression/${encodeURIComponent(exerciseName)}`);
+        const data = await res.json();
+        
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+        
+        renderProgressionChart(data);
+    } catch (err) {
+        console.error("Error:", err);
+        alert("Failed to load progression data");
+    }
+});
+
+function renderProgressionChart(data) {
+    const ctx = document.getElementById('progression-chart').getContext('2d');
+    
+    // Destroy existing chart if it exists (so we can create a new one)
+    if (progressionChart) {
+        progressionChart.destroy();
+    }
+    
+    // Prepare datasets - one line per set
+    const datasets = [];
+    const setNumbers = Object.keys(data.set_data).sort((a, b) => parseInt(a) - parseInt(b));
+    
+    setNumbers.forEach((setNum, index) => {
+        const setInfo = data.set_data[setNum];
+        
+        datasets.push({
+            label: `Set ${setNum}`,
+            data: setInfo.map(point => ({
+                x: point.date,
+                y: point.volume,
+                weight: point.weight, // Store for tooltip
+                reps: point.reps      // Store for tooltip
+            })),
+            borderColor: setColors[index % setColors.length],
+            backgroundColor: setColors[index % setColors.length],
+            tension: 0, // 0 = straight lines, 0.4 = curved
+            pointRadius: 5,
+            pointHoverRadius: 8
+        });
+    });
+    
+    // Create the chart
+    progressionChart = new Chart(ctx, {
+        type: 'line',
+        data: { datasets },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `${data.exercise_name} - Volume Progression`,
+                    color: '#ffffff',
+                    font: { size: 18 }
+                },
+                legend: {
+                    labels: { color: '#ffffff' }
+                },
+                tooltip: {
+                    callbacks: {
+                        // Custom tooltip to show weight and reps
+                        label: function(context) {
+                            const point = context.raw;
+                            return `Volume: ${point.y}kg (${point.weight}kg × ${point.reps} reps)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'time',
+                    time: { unit: 'day' },
+                    title: {
+                        display: true,
+                        text: 'Date',
+                        color: '#ffffff'
+                    },
+                    ticks: { color: '#ffffff' },
+                    grid: { color: '#444' }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Volume (kg)',
+                        color: '#ffffff'
+                    },
+                    ticks: { color: '#ffffff' },
+                    grid: { color: '#444' }
+                }
+            }
+        }
+    });
+}
+
+// Tab Navigation
+const navBtns = document.querySelectorAll('.nav-btn');
+const tabPanes = document.querySelectorAll('.tab-pane');
+
+navBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Remove active class from all
+        navBtns.forEach(b => b.classList.remove('active'));
+        tabPanes.forEach(pane => pane.classList.remove('active'));
+        
+        // Add active to clicked
+        btn.classList.add('active');
+        const tabId = btn.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+    });
+});
+
+
 
 // TIMER 
 let timerInterval = null;
@@ -533,6 +753,9 @@ plus15Btn.addEventListener("click", () => {
         updateDisplays();
     });
 });
+
+
+
 
 
 updateDisplays();

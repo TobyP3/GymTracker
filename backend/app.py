@@ -304,3 +304,85 @@ def delete_template(
     session.delete(t)
     session.commit()
     return {"message": f"Template '{template_name}' deleted."}
+
+
+@app.get("/analytics/calendar/{year}/{month}")
+def get_monthly_calendar(
+    year: int,
+    month: int,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    # Get all exercises for the specified month
+    month_str = f"{year}-{month:02d}"  # Format as "2025-01"
+    
+    exercises = session.exec(
+        select(Exercise).where(
+            Exercise.user_id == current_user.id,
+            Exercise.date.like(f"{month_str}-%")
+        )
+    ).all()
+    
+    # Get unique workout dates
+    workout_dates = set(exercise.date for exercise in exercises)
+    
+    # Create a dictionary with all dates in the month
+    import calendar
+    days_in_month = calendar.monthrange(year, month)[1]
+    
+    result = {}
+    for day in range(1, days_in_month + 1):
+        date_str = f"{year}-{month:02d}-{day:02d}"
+        result[date_str] = date_str in workout_dates
+    
+    return {
+        "year": year,
+        "month": month,
+        "days": result
+    }
+
+
+@app.get("/analytics/exercise_progression/{exercise_name}")
+def get_exercise_progression(
+    exercise_name: str,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    # Get all workout records for this exercise (all dates)
+    workouts = session.exec(
+        select(Workout).where(
+            Workout.user_id == current_user.id,
+            Workout.exercise_name == exercise_name
+        ).order_by(Workout.date)  # Sort by date chronologically
+    ).all()
+    
+    if not workouts:
+        return {"error": "No data found for this exercise"}
+    
+    # Group by date - each date will have multiple sets
+    from collections import defaultdict
+    dates_data = defaultdict(list)  # {"2025-09-01": [set1, set2, set3], ...}
+    
+    for workout in workouts:
+        dates_data[workout.date].append({
+            "reps": workout.reps,
+            "weight": workout.weight,
+            "volume": workout.reps * workout.weight  # Calculate volume
+        })
+    
+    # Reorganize by set position
+    set_data = defaultdict(list)  # {"1": [...], "2": [...], ...}
+    
+    for date, sets in dates_data.items():
+        for set_index, set_info in enumerate(sets, start=1):
+            set_data[str(set_index)].append({
+                "date": date,
+                "volume": set_info["volume"],
+                "weight": set_info["weight"],
+                "reps": set_info["reps"]
+            })
+    
+    return {
+        "exercise_name": exercise_name,
+        "set_data": dict(set_data)
+    }
